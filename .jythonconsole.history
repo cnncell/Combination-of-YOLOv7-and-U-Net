@@ -1,0 +1,4 @@
+from jpktools import macros
+macros.fake()
+from jpktools import macros
+macros.fake()
