@@ -1,5 +1,6 @@
-Training and testing:
+The complete package is contained in the compressed folder "Combination of YOLOv7 and U-Net.zip"
 
+Training and testing:
 1.Training datasets
     Step 1: Create your dataset using LabelImg. Place the original images in VOCdevkit/VOC2007/JPEGImages and the corresponding annotation files in VOCdevkit/VOC2007/Annotations. Run voc_annotation.py to split the dataset into training and test sets. Finally, execute train_yolov7.py to train the YOLOv7 model.
     Step 2: Execute crop.py and use the Batch Crop Images function in yolo.py to crop all detected cells from a folder using the trained YOLOv7 model.
