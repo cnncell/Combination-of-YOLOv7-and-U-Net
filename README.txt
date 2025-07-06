@@ -15,7 +15,7 @@ Additional Notes:
     4.The combination of template matching and network predictions is handled in yolo.py.
     5.Connect the local computer to the JPK microscope control computer via an Ethernet switch, ensuring both devices are on the same local area network (LAN).
     6.Copy the code from auto_jpk.txt into JPK NanoWizard software and execute it.
-t.
+
 
 Reference:
        •https://github.com/bubbliiiing/yolov7-pytorch
