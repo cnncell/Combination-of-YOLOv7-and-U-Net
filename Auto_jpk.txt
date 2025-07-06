@@ -1,0 +1,91 @@
+import time
+import os
+import csv
+# Check the SPM version
+checkVersion('SPM', 7, 0, 178)
+
+# The path to the output table file
+file_path = '/home/jpkuser/Desktop/RUNJPK/output.csv'
+# The path to the output table file
+file_path2 = '/home/jpkuser/Desktop/RUNJPK//output2.csv'
+test_path = '/home/jpkuser/Desktop/RUNJPK//test.csv'
+# File name
+filename = '/home/jpkuser/Desktop/RUNJPK/1'
+testname = '/home/jpkuser/Desktop/RUNJPK/2'
+image1 = '/home/jpkuser/Desktop/RUNJPK/1.tif'
+image2 = '/home/jpkuser/Desktop/RUNJPK/2.tif'
+# Wait for the file corresponding to the file path to appear
+def wait_for_file_path(file_path):  
+    while not os.path.exists(file_path):
+       pass   
+
+
+# Main function
+while True:
+    # Securely delete files
+    for path in [file_path, file_path2,test_path,image1,image2]:
+        try:
+            os.remove(path)
+        except:
+            pass
+    print("Remote all file") 
+    Snapshooter.saveOpticalSnapshot(filename)            # Save the image
+    time.sleep(3.0)       
+    Snapshooter.saveOpticalSnapshot(testname)            # Save the image
+    print("Save the image") 
+    
+    #-------------Initialization-------------#    
+    
+    MotorizedStage.disengage()                           # Disable platform movement
+    ForceSpectroscopy.clearPositions()                   # Clear the coordinates and read new ones
+    ForceSpectroscopy.addPosition(0, 0)                  # Add the initial position to the software table and set it as the origin with index 0
+    ForceSpectroscopy.moveToForcePositionIndex(0)        # Move the probe back to the initial position
+
+    coordinate_count = 0                                 # Variable initialization
+
+    #-------------Small area movement-------------#      
+    wait_for_file_path(test_path)                       # Wait for the file to appear
+    print("The path has been successfully detected")  
+    # Securely delete files
+    for path in [test_path,image1,image2]:
+        try:
+            os.remove(path)
+        except:
+            pass
+    print("remote the image1") 
+    with open(file_path, mode='r') as file:             # Read the coordinates of detectable points
+        reader = csv.reader(file)
+        for row in reader:
+            x = float(row[0])*1e-5
+            y = float(row[1])*1e-5 
+            ForceSpectroscopy.addPosition(x, y)         # Add coordinate points
+            coordinate_count += 1      # Count
+    i=0
+    for j in xrange(coordinate_count):
+        i+=1
+        ForceSpectroscopy.moveToForcePositionIndex(i)   # Move to the specified force position index
+        Scanner.approach()                              # Lower the probe
+        ForceSpectroscopy.startScanning(5)              # Start force spectroscopy scanning, scan 5 times
+        Scanner.retractPiezo()                          # Raise the probe
+        Scanner.moveMotorsUp(2e-5)                      # Raise the probe height
+        time.sleep(1.0)
+        
+    ForceSpectroscopy.addPosition(0, 0)                 # The probe must return to zero
+    
+    #-----------Move the probe in a wide area---------------#
+    for path in [test_path,image1,image2]:
+        try:
+            os.remove(path)
+        except:
+            pass
+    print("remote the image2") 
+    MotorizedStage.engage()                             # Enable platform movement
+    #--Read the large-scale movement coordinates and add them to the JPK system--#
+    with open(file_path2, mode='r') as file:            # Read the coordinates of detectable points
+        reader = csv.reader(file)
+        for row in reader:
+            next_x = float(row[0])*1e-5
+            next_y = float(row[1])*1e-5 
+            MotorizedStage.moveToRelativePosition(next_x,next_y)  # Move to the next position on a large scale
+            
+    MotorizedStage.disengage()                                    # Disable the moving platform
